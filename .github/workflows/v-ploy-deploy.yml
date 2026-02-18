@@ -37,6 +37,20 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      - name: Detect Build Output
+        id: detect_output
+        run: |
+          if [ -d "dist" ]; then
+            echo "BUILD_DIR=dist" >> $GITHUB_ENV
+          elif [ -d "build" ]; then
+            echo "BUILD_DIR=build" >> $GITHUB_ENV
+          elif [ -d "out" ]; then
+            echo "BUILD_DIR=out" >> $GITHUB_ENV
+          else
+            echo "Could not detect build output directory. Defaulting to dist"
+            echo "BUILD_DIR=dist" >> $GITHUB_ENV
+          fi
+
       - name: Upload to R2
         uses: ryand56/r2-upload-action@latest
         with:
@@ -44,9 +58,9 @@ jobs:
           r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
-          source-dir: dist
-          destination-dir: deployments/flowise-84b844cf/${{ github.sha }}
+          source-dir: ${{ env.BUILD_DIR }}
+          destination-dir: deployments/flowise-e65f8673/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-84b844cf", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-e65f8673", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
