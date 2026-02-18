@@ -63,6 +63,12 @@ jobs:
             fi
           fi
 
+      - name: Clean Build Output
+        run: |
+          echo "Removing node_modules from build directory: $BUILD_DIR"
+          find "$BUILD_DIR" -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+          echo "Cleanup complete."
+
       - name: Upload to R2
         uses: ryand56/r2-upload-action@latest
         with:
@@ -71,8 +77,8 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
           source-dir: ${{ env.BUILD_DIR }}
-          destination-dir: deployments/flowise-e6500cf8/${{ github.sha }}
+          destination-dir: deployments/flowise-8f48a3f3/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-e6500cf8", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-8f48a3f3", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
