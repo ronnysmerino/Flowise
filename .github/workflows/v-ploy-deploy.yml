@@ -21,7 +21,18 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          if [ -f "yarn.lock" ]; then
+            npm install -g yarn
+            yarn install --frozen-lockfile
+          elif [ -f "pnpm-lock.yaml" ]; then
+            npm install -g pnpm
+            pnpm install --frozen-lockfile
+          elif [ -f "package-lock.json" ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build Project
         run: npm run build
@@ -34,8 +45,8 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
           source-dir: dist
-          destination-dir: deployments/flowise-2eb823d2/${{ github.sha }}
+          destination-dir: deployments/flowise-c890d3a1/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-2eb823d2", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-c890d3a1", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
