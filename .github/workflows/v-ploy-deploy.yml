@@ -77,8 +77,8 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
           source-dir: ${{ env.BUILD_DIR }}
-          destination-dir: deployments/flowise-8f48a3f3/${{ github.sha }}
+          destination-dir: deployments/flowise-5cd534ac/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-8f48a3f3", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-5cd534ac", "deploymentId": "${{ github.sha }}"}'             https://viiibe-api.spik.workers.dev/api/deploy/github-callback
