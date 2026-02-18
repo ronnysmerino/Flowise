@@ -47,8 +47,20 @@ jobs:
           elif [ -d "out" ]; then
             echo "BUILD_DIR=out" >> $GITHUB_ENV
           else
-            echo "Could not detect build output directory. Defaulting to dist"
-            echo "BUILD_DIR=dist" >> $GITHUB_ENV
+            echo "Root build folder not found. Searching for index.html..."
+            # Find index.html up to 4 levels deep, excluding node_modules
+            HTML_FILE=$(find . -maxdepth 4 -name "index.html" -not -path "*/node_modules/*" -not -path "*/public/*" | head -n 1)
+            
+            if [ -n "$HTML_FILE" ]; then
+              DIR=$(dirname "$HTML_FILE")
+              # Remove leading ./ if present
+              CLEAN_DIR=${DIR#./}
+              echo "Found index.html in $CLEAN_DIR"
+              echo "BUILD_DIR=$CLEAN_DIR" >> $GITHUB_ENV
+            else
+              echo "Could not detect build output directory. Defaulting to dist"
+              echo "BUILD_DIR=dist" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Upload to R2
@@ -59,8 +71,8 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
           source-dir: ${{ env.BUILD_DIR }}
-          destination-dir: deployments/flowise-e65f8673/${{ github.sha }}
+          destination-dir: deployments/flowise-32e4b9cf/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-e65f8673", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-32e4b9cf", "deploymentId": "${{ github.sha }}"}'             https://v-ploy.com/api/deploy/github-callback
