@@ -34,6 +34,17 @@ jobs:
             npm install
           fi
 
+      - name: Inject V-Ploy Environment Variables
+        run: |
+          RESPONSE=$(curl -sf -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}" \
+            https://viiibe-api.spik.workers.dev/api/projects/flowise-c270f24e/env/export || echo "")
+          if [ -n "$RESPONSE" ]; then
+            echo "$RESPONSE" >> $GITHUB_ENV
+            echo "V-Ploy: environment variables injected."
+          else
+            echo "V-Ploy: no environment variables found, continuing without them."
+          fi
+
       - name: Build Project
         run: npm run build
 
@@ -77,8 +88,8 @@ jobs:
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           r2-bucket: ${{ secrets.R2_BUCKET_NAME }}
           source-dir: ${{ env.BUILD_DIR }}
-          destination-dir: deployments/flowise-c0106ed0/${{ github.sha }}
+          destination-dir: deployments/flowise-c270f24e/${{ github.sha }}
 
       - name: Update V-Ploy Deployment
         run: |
-          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-c0106ed0", "deploymentId": "${{ github.sha }}"}'             https://viiibe-api.spik.workers.dev/api/deploy/github-callback
+          curl -X POST             -H "Authorization: Bearer ${{ secrets.VPLOY_API_TOKEN }}"             -H "Content-Type: application/json"             -d '{"projectId": "flowise-c270f24e", "deploymentId": "${{ github.sha }}"}'             https://viiibe-api.spik.workers.dev/api/deploy/github-callback
